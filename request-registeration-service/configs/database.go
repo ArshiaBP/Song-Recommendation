@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"os"
+	"request-registeration-service/models"
 	"sync"
 )
 
@@ -28,6 +29,10 @@ func ConnectToDatabase() {
 		}), &gorm.Config{})
 		if err != nil {
 			log.Fatalf("Failed to connect to database: %v", err)
+		}
+		err = db.AutoMigrate(&models.RequestInfo{})
+		if err != nil {
+			log.Fatalf("Failed to migrate request_infos tabel: %v", err)
 		}
 		DB = db
 	})

@@ -10,7 +10,3 @@ type RequestInfo struct {
 	Status string `gorm:"not null"`
 	SongID string `gorm:""`
 }
-
-type UserRequest struct {
-	Email string `json:"email"`
-}

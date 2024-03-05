@@ -5,14 +5,17 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"os"
 	"request-registeration-service/configs"
 	"request-registeration-service/messages"
 	"request-registeration-service/models"
 )
 
 func SaveRequestHandler(ctx echo.Context) error {
-	req := new(models.UserRequest)
-	if err := ctx.Bind(req); err != nil {
+	var req struct {
+		Email string `json:"email"`
+	}
+	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, messages.InvalidRequestBody)
 	}
 	requestInfo := models.RequestInfo{
@@ -26,12 +29,13 @@ func SaveRequestHandler(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, messages.InternalError)
 	}
-	file, _, err := ctx.Request().FormFile("voice-file")
-	var fileBytes []byte
-	_, err = file.Read(fileBytes)
+	file, handler, err := ctx.Request().FormFile("file")
 	if err != nil {
+		fmt.Println(err)
 		return ctx.JSON(http.StatusInternalServerError, messages.InternalError)
 	}
+	defer file.Close()
+	fileBytes, err := os.ReadFile(handler.Filename)
 	err = configs.UploadFile(bytes.NewReader(fileBytes), fmt.Sprintf("file-%d", requestInfo.ID))
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, messages.FailedToUploadFile)
