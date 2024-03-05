@@ -17,6 +17,7 @@ func main() {
 		}
 	}
 	configs.ConnectToDatabase()
+	configs.ConnectToRabbitMQ()
 	server := echo.New()
 	server.POST("/send-song", handlers.SaveRequestHandler)
 	log.Fatal(server.Start("localhost:8080"))

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"net/http"
 	"os"
 	"request-registeration-service/configs"
@@ -39,6 +40,13 @@ func SaveRequestHandler(ctx echo.Context) error {
 	err = configs.UploadFile(bytes.NewReader(fileBytes), fmt.Sprintf("file-%d", requestInfo.ID))
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, messages.FailedToUploadFile)
+	}
+	err = configs.Ch.PublishWithContext(configs.Ctx, "", configs.Queue.Name, false, false, amqp.Publishing{
+		ContentType: "text/plain",
+		Body:        []byte(fmt.Sprint(requestInfo.ID)),
+	})
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, messages.FailedToWriteInMQ)
 	}
 	return ctx.JSON(http.StatusOK, messages.RequestRegistered)
 }
