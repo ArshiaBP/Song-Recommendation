@@ -2,9 +2,11 @@ package main
 
 import (
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo/v4"
 	"log"
 	"os"
 	"request-registeration-service/configs"
+	"request-registeration-service/handlers"
 )
 
 func main() {
@@ -15,5 +17,7 @@ func main() {
 		}
 	}
 	configs.ConnectToDatabase()
-	log.Println("connected to database")
+	server := echo.New()
+	server.POST("/send-song", handlers.SaveRequestHandler)
+	log.Fatal(server.Start("localhost:8080"))
 }

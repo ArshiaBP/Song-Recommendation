@@ -13,7 +13,6 @@ import (
 )
 
 func UploadFile(fileContent *bytes.Reader, fileName string) error {
-
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("App .env file not found")
@@ -25,10 +24,10 @@ func UploadFile(fileContent *bytes.Reader, fileName string) error {
 	}
 
 	// Define AWS credentials and bucket information
-	awsAccessKeyID := os.Getenv("LIARA_ACCESS_KEY")
-	awsSecretAccessKey := os.Getenv("LIARA_SECRET_KEY")
-	endpoint := os.Getenv("LIARA_ENDPOINT")
-	bucketName := os.Getenv("LIARA_BUCKET_NAME")
+	awsAccessKeyID := os.Getenv("ACCESS_KEY")
+	awsSecretAccessKey := os.Getenv("SECRET_KEY")
+	endpoint := os.Getenv("ENDPOINT")
+	bucketName := os.Getenv("BUCKET_NAME")
 
 	// Initialize S3 client with custom configuration
 	cfg.Credentials = aws.CredentialsProviderFunc(func(ctx context.Context) (aws.Credentials, error) {
@@ -66,10 +65,10 @@ func DownloadFile(fileName string) error {
 		return err
 	}
 	// Define AWS credentials and bucket information
-	awsAccessKeyID := os.Getenv("LIARA_ACCESS_KEY")
-	awsSecretAccessKey := os.Getenv("LIARA_SECRET_KEY")
-	endpoint := os.Getenv("LIARA_ENDPOINT")
-	bucketName := os.Getenv("LIARA_BUCKET_NAME")
+	awsAccessKeyID := os.Getenv("ACCESS_KEY")
+	awsSecretAccessKey := os.Getenv("SECRET_KEY")
+	endpoint := os.Getenv("ENDPOINT")
+	bucketName := os.Getenv("BUCKET_NAME")
 
 	// Initialize S3 client with custom configuration
 	cfg.Credentials = aws.CredentialsProviderFunc(func(ctx context.Context) (aws.Credentials, error) {
