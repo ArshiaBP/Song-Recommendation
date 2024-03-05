@@ -1,0 +1,36 @@
+version: '3.8'
+
+networks:
+  hw_net:
+    driver: bridge
+    name: hw_net
+
+services:
+  back-end:
+    build: ./request-registeration-service
+    container_name: back-end
+    depends_on:
+      db-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - hw_net
+
+  db-service:
+    image: postgres:13-alpine
+    container_name: db-service
+    restart: always
+    environment:
+      -POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      -POSTGRES_USER: ${DATABASE_USERNAME}
+      -POSTGRES_DB: ${DATABASE_DB}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hw_net
+    volumes:
+      - ./data/pg-data:/var/lib/postgresql/data
