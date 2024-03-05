@@ -28,17 +28,22 @@ func SaveRequestHandler(ctx echo.Context) error {
 	}
 	err := ctx.Request().ParseMultipartForm(10 << 20)
 	if err != nil {
+		requestInfo.Status = "failure"
+		configs.DB.Save(&requestInfo)
 		return ctx.JSON(http.StatusInternalServerError, messages.InternalError)
 	}
 	file, handler, err := ctx.Request().FormFile("file")
 	if err != nil {
-		fmt.Println(err)
+		requestInfo.Status = "failure"
+		configs.DB.Save(&requestInfo)
 		return ctx.JSON(http.StatusInternalServerError, messages.InternalError)
 	}
 	defer file.Close()
 	fileBytes, err := os.ReadFile(handler.Filename)
 	err = configs.UploadFile(bytes.NewReader(fileBytes), fmt.Sprintf("file-%d", requestInfo.ID))
 	if err != nil {
+		requestInfo.Status = "failure"
+		configs.DB.Save(&requestInfo)
 		return ctx.JSON(http.StatusInternalServerError, messages.FailedToUploadFile)
 	}
 	err = configs.Ch.PublishWithContext(configs.Ctx, "", configs.Queue.Name, false, false, amqp.Publishing{
@@ -46,6 +51,8 @@ func SaveRequestHandler(ctx echo.Context) error {
 		Body:        []byte(fmt.Sprint(requestInfo.ID)),
 	})
 	if err != nil {
+		requestInfo.Status = "failure"
+		configs.DB.Save(&requestInfo)
 		return ctx.JSON(http.StatusInternalServerError, messages.FailedToWriteInMQ)
 	}
 	return ctx.JSON(http.StatusOK, messages.RequestRegistered)
