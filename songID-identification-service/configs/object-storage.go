@@ -1,27 +1,26 @@
 package configs
 
 import (
-	"bytes"
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/joho/godotenv"
+	"io"
 	"log"
 	"os"
 )
 
-func UploadFile(fileContent *bytes.Reader, fileName string) error {
+func DownloadFile(fileName string) ([]byte, error) {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("App .env file not found")
 	}
 
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion("us-west-2"))
+	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion("us-west-2"))
 	if err != nil {
-		return err
+		return []byte{}, err
 	}
-
 	// Define AWS credentials and bucket information
 	awsAccessKeyID := os.Getenv("ACCESS_KEY")
 	awsSecretAccessKey := os.Getenv("SECRET_KEY")
@@ -43,12 +42,26 @@ func UploadFile(fileContent *bytes.Reader, fileName string) error {
 	// Specify the destination key in the bucket
 	destinationKey := "uploads/" + fileName
 
-	// Use the S3 client to upload the file
-	_, err = client.PutObject(context.TODO(), &s3.PutObjectInput{
+	result, err := client.GetObject(context.TODO(), &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(destinationKey),
-		Body:   fileContent,
 	})
-
-	return err
+	if err != nil {
+		log.Printf("Couldn't get object %v:%v. Here's why: %v\n", bucketName, destinationKey, err)
+		return []byte{}, err
+	}
+	defer result.Body.Close()
+	body, err := io.ReadAll(result.Body)
+	if err != nil {
+		log.Printf("Couldn't read object body from %v. Here's why: %v\n", destinationKey, err)
+		return []byte{}, err
+	}
+	//file, err := os.Create(fileName)
+	//if err != nil {
+	//	log.Printf("Couldn't create file %v. Here's why: %v\n", fileName, err)
+	//	return []byte{}, err
+	//}
+	//defer file.Close()
+	//_, err = file.Write(body)
+	return body, nil
 }

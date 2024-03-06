@@ -2,11 +2,10 @@ package main
 
 import (
 	"github.com/joho/godotenv"
-	"github.com/labstack/echo/v4"
 	"log"
 	"os"
-	"request-registeration-service/configs"
-	"request-registeration-service/controllers"
+	"songID-identification-service/configs"
+	"songID-identification-service/controllers"
 )
 
 func main() {
@@ -18,7 +17,5 @@ func main() {
 	}
 	configs.ConnectToDatabase()
 	configs.ConnectToRabbitMQ()
-	server := echo.New()
-	server.POST("/send-song", controllers.SaveRequestHandler)
-	log.Fatal(server.Start("localhost:8080"))
+	controllers.Consume()
 }
