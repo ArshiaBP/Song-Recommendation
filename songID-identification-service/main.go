@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 	"songID-identification-service/configs"
-	"songID-identification-service/controllers"
+	"songID-identification-service/services"
 )
 
 func main() {
@@ -17,5 +17,5 @@ func main() {
 	}
 	configs.ConnectToDatabase()
 	configs.ConnectToRabbitMQ()
-	controllers.Consume()
+	services.Consume()
 }
