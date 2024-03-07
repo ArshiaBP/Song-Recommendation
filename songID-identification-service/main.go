@@ -16,6 +16,9 @@ func main() {
 		}
 	}
 	configs.ConnectToDatabase()
+	log.Println("database connected")
 	configs.ConnectToRabbitMQ()
-	services.Consume()
+	log.Println("rabbitmq connected")
+	log.Println("service started")
+	services.Listen()
 }

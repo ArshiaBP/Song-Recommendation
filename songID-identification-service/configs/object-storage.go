@@ -56,12 +56,5 @@ func DownloadFile(fileName string) ([]byte, error) {
 		log.Printf("Couldn't read object body from %v. Here's why: %v\n", destinationKey, err)
 		return []byte{}, err
 	}
-	//file, err := os.Create(fileName)
-	//if err != nil {
-	//	log.Printf("Couldn't create file %v. Here's why: %v\n", fileName, err)
-	//	return []byte{}, err
-	//}
-	//defer file.Close()
-	//_, err = file.Write(body)
 	return body, nil
 }
