@@ -1,16 +1,15 @@
 package services
 
-import "email-service/configs"
+import (
+	"email-service/configs"
+	"email-service/models"
+)
 
-func checkStatus() (string, string, string, error) {
-	var infos struct {
-		email  string
-		songID string
-		status string
-	}
-	result := configs.DB.Table("request_infos").Where("status in ?", []string{"ready", "failure"}).Select([]string{"email", "song_id", "status"}).Scan(&infos)
+func CheckStatus() ([]models.RequestInfo, error) {
+	var requests []models.RequestInfo
+	result := configs.DB.Select([]string{"email", "song_id", "status"}).Where("status in ?", []string{"ready", "failure"}).Find(&requests)
 	if result.Error != nil {
-		return "", "", "", result.Error
+		return []models.RequestInfo{}, result.Error
 	}
-	return infos.email, infos.songID, infos.status, nil
+	return requests, nil
 }
