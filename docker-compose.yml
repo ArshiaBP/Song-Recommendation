@@ -6,14 +6,40 @@ networks:
     name: hw_net
 
 services:
-  back-end:
+  request-registeration-service:
     build: ./request-registeration-service
-    container_name: back-end
+    container_name: request-registeration-service
+    depends_on:
+      db-service:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./request-registeration-service.env
+    networks:
+      - hw_net
+
+  songID-identification-service:
+    build: ./songID-identification-service
+    container_name: songID-identification-service
+    depends_on:
+      db-service:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./songID-identification-service.env
+    networks:
+      - hw_net
+
+  email-service:
+    build: ./email-service
+    container_name: email-service
     depends_on:
       db-service:
         condition: service_healthy
     env_file:
-      - .env
+      - ./email-service.env
     networks:
       - hw_net
 
@@ -34,3 +60,15 @@ services:
       - hw_net
     volumes:
       - ./data/pg-data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3.9-alpine
+    container_name: rabbitmq
+    restart: always
+    environment:
+      -AMQP_URL: ${RabbitMQ_URL}
+      -RABBITMQ_DEFAULT_USER: ${RabbitMQ_User}
+      -RABBITMQ_DEFAULT_PASS: ${RabbitMQ_Pass}
+    volumes:
+      - ./data/rabbitmq-data:/var/lib/rabbitmq
+

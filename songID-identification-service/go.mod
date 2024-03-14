@@ -1,6 +1,6 @@
 module songID-identification-service
 
-go 1.21.4
+go 1.21
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.25.2

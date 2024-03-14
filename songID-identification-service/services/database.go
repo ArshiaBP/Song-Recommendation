@@ -1,7 +1,6 @@
 package services
 
 import (
-	"log"
 	"songID-identification-service/configs"
 )
 
@@ -15,6 +14,5 @@ func saveSpotifyID(requestID int) error {
 		return err
 	}
 	result = configs.DB.Table("request_infos").Where("id = ?", requestID).Update("status", "ready")
-	log.Println("4")
 	return result.Error
 }

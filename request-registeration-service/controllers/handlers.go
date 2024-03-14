@@ -13,15 +13,9 @@ import (
 )
 
 func SaveRequestHandler(ctx echo.Context) error {
-	var req struct {
-		Email string `json:"email"`
-	}
-	if err := ctx.Bind(&req); err != nil {
-		return ctx.JSON(http.StatusBadRequest, messages.InvalidRequestBody)
-	}
+	email := ctx.Param("email")
 	requestInfo := models.RequestInfo{
-		//Email:  req.Email,
-		Email:  "arshia.bahar@gmail.com",
+		Email:  email,
 		Status: "pending",
 	}
 	if err := configs.DB.Create(&requestInfo).Error; err != nil {
