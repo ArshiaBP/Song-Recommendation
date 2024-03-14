@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/mailgun/mailgun-go/v4"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -34,19 +35,23 @@ func recommendationList(songID string) ([]string, error) {
 	req.Header.Add("X-RapidAPI-Host", spotifyHost)
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
+		log.Println("spotify recommender failed")
 		return []string{}, err
 	}
 	resBytes, err := io.ReadAll(response.Body)
 	if err != nil {
+		log.Println("spotify recommender failed")
 		return []string{}, err
 	}
 	err = json.Unmarshal(resBytes, &res)
 	if err != nil {
+		log.Println("spotify recommender failed")
 		return []string{}, err
 	}
 	for i := 0; i < 5; i++ {
 		songs[i] = res.Tracks[i].Name
 	}
+	log.Println("spotify recommender worked successfully")
 	return songs, nil
 }
 

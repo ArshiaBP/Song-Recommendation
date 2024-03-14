@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"io"
+	"log"
 	"net/http"
 	"request-registeration-service/configs"
 	"request-registeration-service/messages"
@@ -21,6 +22,7 @@ func SaveRequestHandler(ctx echo.Context) error {
 	if err := configs.DB.Create(&requestInfo).Error; err != nil {
 		return ctx.JSON(http.StatusInternalServerError, messages.FailedToSaveRequest)
 	}
+	log.Println("request added to database")
 	err := ctx.Request().ParseMultipartForm(10 << 20)
 	if err != nil {
 		requestInfo.Status = "failure"
@@ -46,6 +48,7 @@ func SaveRequestHandler(ctx echo.Context) error {
 		configs.DB.Save(&requestInfo)
 		return ctx.JSON(http.StatusInternalServerError, messages.FailedToUploadFile)
 	}
+	log.Println("file uploaded")
 	err = configs.Ch.PublishWithContext(configs.Ctx, "", configs.Queue.Name, false, false, amqp.Publishing{
 		ContentType: "text/plain",
 		Body:        []byte(fmt.Sprint(requestInfo.ID)),
@@ -55,5 +58,6 @@ func SaveRequestHandler(ctx echo.Context) error {
 		configs.DB.Save(&requestInfo)
 		return ctx.JSON(http.StatusInternalServerError, messages.FailedToWriteInMQ)
 	}
+	log.Println("request id added to queue")
 	return ctx.JSON(http.StatusOK, messages.RequestRegistered)
 }

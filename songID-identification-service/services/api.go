@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -35,8 +36,10 @@ func getSongTitle(requestID int) (string, error) {
 	fieldName := "upload_file"
 	fileBytes, err := getSong(requestID)
 	if err != nil {
+		log.Println("download file failed")
 		return "", err
 	}
+	log.Println("file downloaded")
 	part, err := w.CreateFormFile(fieldName, filepath.Base(fileName))
 	if err != nil {
 		return "", err
@@ -86,11 +89,14 @@ func getSongID(requestID int) (string, error) {
 	}
 	title, err := getSongTitle(requestID)
 	if err != nil {
+		log.Println("shazam api failed")
 		return "", err
 	}
 	if title == "" {
+		log.Println("shazam api failed")
 		return "", errors.New("empty title")
 	}
+	log.Println("shazam api worked successfully")
 	titleWords := strings.Split(title, " ")
 	spotifyURL := fmt.Sprintf("%s%s", spotifyBaseURL, titleWords[0])
 	for i, word := range titleWords {
@@ -109,14 +115,17 @@ func getSongID(requestID int) (string, error) {
 	req.Header.Add("X-RapidAPI-Host", spotifyHost)
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
+		log.Println("spotify api failed")
 		return "", err
 	}
 	resBytes, err := io.ReadAll(response.Body)
 	if err != nil {
+		log.Println("spotify api failed")
 		return "", err
 	}
 	err = json.Unmarshal(resBytes, &res)
 	if err != nil {
+		log.Println("spotify api failed")
 		return "", err
 	}
 	return res.Tracks.Items[0].Data.ID, nil
